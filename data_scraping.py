@@ -5,6 +5,7 @@ import sys
 import requests
 
 
+
 print()
 # For some responsive purpose, to add a '-v' --verbose option CLI command it's not a waste.
 xargs = False
