@@ -1,3 +1,4 @@
+
 import mysql.connector
 import bs4
 from datetime import datetime
@@ -5,16 +6,18 @@ import sys
 import requests
 
 
-
 print()
 # For some responsive purpose, to add a '-v' --verbose option CLI command it's not a waste.
 xargs = False
+
 if (len(sys.argv) > 2):
+
     print("Error : Too many arguments")
     exit()
-elif (len(sys.argv) == 2):
-    xargs = True if (sys.argv[1] == '-v') else print("\nUsage:\n\tonly either '-v' or nothing args\n")
 
+elif (len(sys.argv) == 2):
+
+    xargs = True if (sys.argv[1] == '-v') else print("\nUsage:\n\tonly either '-v' or nothing args\n")
 
 # this file execute the scraping task to get some data about the following array of crypto-currencies
 
@@ -25,17 +28,14 @@ elif (len(sys.argv) == 2):
 # to populate a database with the data in real time, and later this is orchestrated by crontab to execute it
 # every 5 minutes, including the time.
 
-
 target_currency = ["Bitcoin", "Ethereum", "Dogecoin", "Tether", "BNB"]      # currencies that we are gonna get.
 
 URL = 'https://coinmarketcap.com/all/views/all/'
-
 
 # MYSQL connection
 connection = mysql.connector.connect(user='root', password='kali', database='xlocal')
 connection.autocommit = True
 cursor = connection.cursor()
-
 
 response = requests.request('GET', URL)                     # getting the entire page
 print(f">> {'Response GET:':<20s}{str(response)+'.':>20s}")
@@ -45,7 +45,6 @@ print(f">> {'Page name:':<20s}{str(page.name)+' Parsed.':>20s}")
 
 a_tags = page.find_all("a")                                 # fetching all the 'a' tags
 print(f">> {'Amount of `a` tag:':<20s}{str(len(a_tags))+'.':>20s}")
-
 
 # class attributte of every item to catch
 row_class = "cmc-table-row"                                 # class identifier of every row
@@ -57,6 +56,7 @@ market_class = "sc-1ow4cwt-1 ieFnWP"
 
 
 datetime_stamp_mysql = "{0:%Y}-{0:%m}-{0:%d} {0:%H}:{0:%M}:{0:%S}".format(datetime.now())       # current timestamp
+
 
 
 # fetching all the crypto-currency description
@@ -80,6 +80,7 @@ def get_data():
             sql_data.append(tuple([currency_rank, currency_symbol, currency_name, currency_market_cap, currency_price, datetime_stamp_mysql]))
 
         except:    
+
             print("\n\tToo low-rank to scrap {}".format(target_currency[currency]))
     
     return sql_data
@@ -114,19 +115,23 @@ def get_insert_query(sql_values, table, database):
 
 # executing the main program
 if __name__ == '__main__':
+
     mysql_values = get_data()
     sql_query = get_insert_query(mysql_values, 'cryptocurrencies', 'xlocal')
     print(f"\n{sql_query}") if (xargs) else None
 
-
-# catching any ingesting error and closing the connection
+    # catching any ingesting error and closing the connection
     try:
+
         cursor.execute(sql_query)
+
     except mysql.connector.Error as E:
+
         print("Something went wrong ingesting data into MySQL : {}".format(E))
+
     finally:
-        if connection.is_connected():
-            connection.close()
+
+        if connection.is_connected(): connection.close()
 
 
 # also to complete the orchest, we define the period of execution for this .py file
